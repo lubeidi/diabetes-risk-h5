@@ -120,5 +120,5 @@ if [ ! -f "${LIB}" ]; then
   exit 1
 fi
 
-bash "${LIB}" "${SERVICE}" "${HELM_CHART_DIR}" "${VALUES_PATH}" "${ENV}" "${K8S_ENV}"
+bash "${LIB}" "${SERVICE}" "${HELM_CHART_DIR}" "${VALUES_PATH}" "${ENV}" "${K8S_ENV}" "${IMAGE_TAG}"
 

@@ -2,13 +2,13 @@ FROM node:20-alpine AS vendor
 WORKDIR /app
 COPY package.json package-lock.json ./
 COPY scripts/copy-vendor-assets.mjs ./scripts/
-RUN npm ci
+RUN npm ci && node scripts/copy-vendor-assets.mjs
 
 FROM nginx:1.27-alpine
 
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 COPY index.html /usr/share/nginx/html/
-COPY public/config.js public/moeagi-client.js public/tracker.js public/app.js /usr/share/nginx/html/
+COPY public/ /usr/share/nginx/html/
 COPY --from=vendor /app/public/vendor /usr/share/nginx/html/vendor
 
 EXPOSE 80

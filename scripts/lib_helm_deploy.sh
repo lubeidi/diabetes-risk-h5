@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 # helm_upgrade_install retries helm when ingress-nginx admission webhook is down.
+set -euo pipefail
+
 helm_upgrade_install() {
     local release_name="$1"
     local values_file="$2"
@@ -43,3 +45,20 @@ helm_upgrade_install() {
     )
 }
 
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+    SERVICE="${1:?service required}"
+    HELM_CHART_DIR="${2:?chart dir required}"
+    VALUES_PATH="${3:?values file required}"
+    ENV="${4:?env required}"
+    K8S_ENV="${5:?k8s env required}"
+    IMAGE_TAG="${6:-}"
+
+    if [ -z "${IMAGE_TAG}" ]; then
+        IMAGE_TAG="$(grep -E '^\s*tag:' "${VALUES_PATH}" | head -1 | sed -E 's/.*tag:\s*"?([^"]+)"?.*/\1/')"
+    fi
+
+    RELEASE_NAME="${SERVICE}-${ENV}"
+    echo ">>> helm upgrade --install ${RELEASE_NAME} namespace=api-adapter tag=${IMAGE_TAG} k8s=${K8S_ENV}"
+    helm_upgrade_install "${RELEASE_NAME}" "${VALUES_PATH}" "${IMAGE_TAG}" "${HELM_CHART_DIR}"
+    echo ">>> helm deploy done: ${RELEASE_NAME}"
+fi
