@@ -8,9 +8,11 @@ data:
   config.js: |
     (function (global) {
       "use strict";
-      global.EAT_API_BASE = {{ .Values.config.apiBaseUrl | quote }};
-      global.EAT_API_AUTH = {{ .Values.config.apiAuth | quote }};
-      global.EAT_DIABETES_EXPERT = {{ .Values.config.diabetesExpert | quote }};
-      global.EAT_DIABETES_MODEL = {{ .Values.config.diabetesModel | quote }};
+      // apiBaseUrl = ac-adapter root, same as Android MoeAgiConfig.baseUrl
+      var apiBaseUrl = {{ .Values.config.apiBaseUrl | quote }};
+      global.DIABETES_API_BASE = apiBaseUrl.replace(/\/+$/, "") + "/moeagi";
+      global.DIABETES_API_AUTH = {{ .Values.config.apiAuth | quote }};
+      global.DIABETES_MODEL = {{ .Values.config.diabetesModel | quote }};
+      global.DIABETES_EXPERT = {{ .Values.config.diabetesExpert | quote }};
+      global.DIABETES_LANGUAGE = {{ .Values.config.language | default "zh" | quote }};
     })(typeof window !== "undefined" ? window : globalThis);
-

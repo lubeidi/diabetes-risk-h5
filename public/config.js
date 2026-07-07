@@ -1,7 +1,12 @@
 /**
  * diabetes-risk-h5 runtime config.
- * Production: overridden by Helm ConfigMap.
- * Local dev: vite proxies /moeagi -> ac-adapter.
+ * Production: overridden by Helm ConfigMap (DIABETES_API_BASE = {apiBaseUrl}/moeagi).
+ * Local dev: vite proxies /moeagi -> ac-adapter (see vite.config.js).
+ *
+ * Align with Android MoeAgiConfig:
+ *   dev/dev2  -> .../dev/ac-adapter, .../dev2/ac-adapter
+ *   preview   -> .../preview/ac-adapter
+ *   stable    -> .../ac-adapter
  */
 (function (global) {
   "use strict";

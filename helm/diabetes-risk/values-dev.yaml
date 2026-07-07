@@ -6,7 +6,7 @@ image:
   tag: "2026-07-07-15-20"
 
 config:
-  apiBaseUrl: "https://ai-cloud-bk.4paradigm.com/ac-adapter"
+  apiBaseUrl: "https://ai-cloud-bk.4paradigm.com/dev/ac-adapter"
   apiAuth: "Basic bGxtOlJtZjQjTGNHKGlGWnJqVTsySg=="
   diabetesExpert: "expert-phanthy-diabetes_predict"
   diabetesModel: "phanthy-lite"

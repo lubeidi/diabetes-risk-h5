@@ -392,6 +392,7 @@
     headerMenuEl.classList.add("hidden");
     return (
       '<div class="processing">' +
+      '<div class="processing__spinner" aria-hidden="true"></div>' +
       '<div class="processing__title">AI 正在解读报告</div>' +
       '<div class="processing__status" id="processing-status">' +
       escapeHtml(PROCESSING_MESSAGES[state.processingStatusIndex]) +
@@ -509,7 +510,7 @@
   function renderBottomBar() {
     if (state.stage === STAGE.LIFESTYLE) {
       bottomBarEl.innerHTML =
-        '<button type="button" class="btn btn--primary" id="btn-next">下一步，选择录入方式</button>';
+        '<button type="button" class="btn btn--primary" id="btn-next">下一步</button>';
       bottomBarEl.classList.remove("hidden");
       return;
     }
@@ -780,7 +781,9 @@
       }
       DiabetesRiskTracker.lifeNextClick();
       state.skipLifestyle = true;
-      state.stage = STAGE.MODE_SELECT;
+      // Align with native flow: default to upload page, manual entry can be chosen within upload page.
+      state.uploadPath = true;
+      state.stage = STAGE.UPLOAD;
       render();
       return;
     }
@@ -1139,11 +1142,13 @@
       return;
     }
     if (state.stage === STAGE.RESULT) {
-      DiabetesAdvisorSession.clear();
-      DiabetesBridge.finish();
+      // Align with native: result is a leaf page; back returns to upload page.
+      state.stage = STAGE.UPLOAD;
+      render();
       return;
     }
     if (state.stage === STAGE.LIFESTYLE) {
+      DiabetesAdvisorSession.clear();
       DiabetesBridge.finish();
       return;
     }
@@ -1160,7 +1165,9 @@
       if (state.skipLifestyle) {
         state.stage = STAGE.LIFESTYLE;
       } else {
-        state.stage = STAGE.MODE_SELECT;
+        DiabetesAdvisorSession.clear();
+        DiabetesBridge.finish();
+        return;
       }
       render();
       return;
@@ -1189,7 +1196,7 @@
       } else if (state.skipLifestyle) {
         state.stage = STAGE.UPLOAD;
       } else {
-        state.stage = STAGE.MODE_SELECT;
+        state.stage = STAGE.LIFESTYLE;
       }
       render();
     }
