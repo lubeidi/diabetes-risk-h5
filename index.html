@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1"
+    />
+    <meta name="theme-color" content="#7c3aed" />
+    <title>糖尿病风险AI预测</title>
+    <link rel="stylesheet" href="app.css" />
+    <script>
+      (function () {
+        var q = new URLSearchParams(location.search);
+        if (q.get("inApp") === "1") {
+          document.documentElement.style.setProperty(
+            "--status-bar-height",
+            q.get("statusBarHeight") || "env(safe-area-inset-top, 0px)"
+          );
+          document.documentElement.style.setProperty(
+            "--safe-area-bottom",
+            q.get("safeAreaBottom") || "env(safe-area-inset-bottom, 0px)"
+          );
+        }
+      })();
+    </script>
+  </head>
+  <body>
+    <div class="app" id="app">
+      <header class="header">
+        <button type="button" class="header__back" id="btn-back" aria-label="返回">‹</button>
+        <h1 class="header__title" id="header-title">糖尿病风险AI预测</h1>
+        <button type="button" class="header__menu hidden" id="header-menu">示例文件</button>
+      </header>
+      <main class="main" id="main"></main>
+      <div class="bottom-bar hidden" id="bottom-bar"></div>
+    </div>
+
+    <div class="sheet" id="unlock-sheet">
+      <div class="sheet__backdrop"></div>
+      <div class="sheet__panel">
+        <h2 class="sheet__title">解锁完整健康报告</h2>
+        <p class="sheet__benefit">AI糖尿病风险评估</p>
+        <p class="sheet__benefit">6维度可视化指标风险图谱</p>
+        <p class="sheet__benefit">个性化健康管理方案</p>
+        <p class="sheet__benefit">免费无限次问AI</p>
+        <div class="btn-row" style="margin-top:16px">
+          <button type="button" class="btn btn--ghost" id="btn-sheet-close">取消</button>
+          <button type="button" class="btn btn--primary" id="btn-sheet-unlock">立即解锁</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="toast" id="toast" role="status"></div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js" defer></script>
+    <script src="config.js" defer></script>
+    <script src="thinking-filter.js" defer></script>
+    <script src="form-data.js" defer></script>
+    <script src="prompts/diabetes-ai-prompt.js" defer></script>
+    <script src="prompts/diabetes-parse-prompt.js" defer></script>
+    <script src="moeagi-client.js" defer></script>
+    <script src="ai-repository.js" defer></script>
+    <script src="bridge.js" defer></script>
+    <script src="tracker.js" defer></script>
+    <script src="advisor-session.js" defer></script>
+    <script src="free-chat-counter.js" defer></script>
+    <script src="report-access.js" defer></script>
+    <script src="markdown.js" defer></script>
+    <script src="app.js" defer></script>
+  </body>
+</html>

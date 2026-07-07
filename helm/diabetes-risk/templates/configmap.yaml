@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "diabetes-risk.fullname" . }}-config
+  labels:
+    {{- include "diabetes-risk.labels" . | nindent 4 }}
+data:
+  config.js: |
+    (function (global) {
+      "use strict";
+      global.EAT_API_BASE = {{ .Values.config.apiBaseUrl | quote }};
+      global.EAT_API_AUTH = {{ .Values.config.apiAuth | quote }};
+      global.EAT_DIABETES_EXPERT = {{ .Values.config.diabetesExpert | quote }};
+      global.EAT_DIABETES_MODEL = {{ .Values.config.diabetesModel | quote }};
+    })(typeof window !== "undefined" ? window : globalThis);
+

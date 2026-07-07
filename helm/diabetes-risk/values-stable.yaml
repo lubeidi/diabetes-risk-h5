@@ -1,0 +1,42 @@
+replicaCount: 2
+
+image:
+  repository: bj-warehouse.tencentcloudcr.com/weike/diabetes-risk
+  pullPolicy: IfNotPresent
+  tag: "2026-07-07-15-20"
+
+config:
+  apiBaseUrl: "https://ai-cloud-bk.4paradigm.com/ac-adapter"
+  apiAuth: "Basic bGxtOlJtZjQjTGNHKGlGWnJqVTsySg=="
+  diabetesExpert: "expert-phanthy-diabetes_predict"
+  diabetesModel: "phanthy-lite"
+
+ingress:
+  enabled: true
+  className: "haproxy"
+  annotations:
+    haproxy.org/path-rewrite: /stable/diabetes-risk/(.*) /\1
+  hosts:
+    - host: "ai-cloud-bk.4paradigm.com"
+      paths:
+        - path: /stable/diabetes-risk/
+          pathType: Prefix
+  tls: []
+
+resources:
+  limits:
+    cpu: 300m
+    memory: 256Mi
+  requests:
+    cpu: 50m
+    memory: 64Mi
+
+livenessProbe:
+  httpGet:
+    path: /health
+    port: http
+readinessProbe:
+  httpGet:
+    path: /health
+    port: http
+

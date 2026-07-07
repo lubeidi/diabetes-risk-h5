@@ -1,0 +1,49 @@
+replicaCount: 1
+
+image:
+  repository: bj-warehouse.tencentcloudcr.com/weike/diabetes-risk
+  pullPolicy: IfNotPresent
+  tag: ""
+
+nameOverride: ""
+fullnameOverride: ""
+
+podAnnotations: {}
+podLabels: {}
+
+service:
+  type: ClusterIP
+  port: 80
+
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+  hosts:
+    - host: chart-example.local
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []
+
+config:
+  apiBaseUrl: ""
+  apiAuth: "Basic bGxtOlJtZjQjTGNHKGlGWnJqVTsySg=="
+  diabetesExpert: ""
+  diabetesModel: ""
+
+resources: {}
+
+livenessProbe:
+  httpGet:
+    path: /health
+    port: http
+readinessProbe:
+  httpGet:
+    path: /health
+    port: http
+
+nodeSelector: {}
+tolerations: []
+affinity: {}
+
