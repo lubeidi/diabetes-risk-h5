@@ -456,6 +456,25 @@ body {
   font-size: 12px;
 }
 
+.result-content .md-image,
+.bubble .md-image {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: 8px 0;
+  border-radius: 8px;
+}
+
+.result-content .md-image--error,
+.bubble .md-image--error {
+  width: 100%;
+  min-height: 80px;
+  background: #f5f5f7;
+  color: var(--text-hint);
+  font-size: 12px;
+  object-fit: contain;
+}
+
 .unlock-overlay {
   position: relative;
   min-height: 200px;

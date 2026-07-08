@@ -28,6 +28,8 @@
   var NUMBER_PATTERN = /^\d+(\.\d+)?$/;
   var MAX_FILES = window.DIABETES_MAX_FILES || 2;
   var MAX_FILE_BYTES = window.DIABETES_MAX_FILE_BYTES || 100 * 1024 * 1024;
+  var SAMPLE_PDF_PATH = "assets/diabetes_sample_report.pdf";
+  var SAMPLE_PDF_NAME = "示例体检报告.pdf";
 
   var state = {
     stage: STAGE.LIFESTYLE,
@@ -566,6 +568,9 @@
     renderBottomBar();
     bindStageEvents();
     trackStagePageClicks();
+    if (state.stage === STAGE.RESULT || state.stage === STAGE.ADVISOR) {
+      DiabetesMarkdown.hydrateImages(mainEl);
+    }
     if (state.stage === STAGE.PDF_PREVIEW) loadPdfPreview();
     if (state.stage === STAGE.ADVISOR) setupAdvisorInput();
   }
@@ -1042,7 +1047,10 @@
         },
         onComplete: function (full) {
           var reply = DiabetesThinkingFilter.strip(full || state.advisorStreamText);
-          if (streamBubble) streamBubble.innerHTML = DiabetesMarkdown.render(reply);
+          if (streamBubble) {
+            streamBubble.innerHTML = DiabetesMarkdown.render(reply);
+            DiabetesMarkdown.hydrateImages(streamBubble);
+          }
           DiabetesAdvisorSession.appendExchange(text, reply);
           state.advisorSending = false;
           state.advisorStreamText = "";
@@ -1202,9 +1210,41 @@
     }
   }
 
+  function resolveAssetUrl(relativePath) {
+    var basePath = location.pathname;
+    if (!basePath.endsWith("/")) {
+      basePath = basePath.replace(/\/[^/]*$/, "/");
+    }
+    return basePath + String(relativePath || "").replace(/^\//, "");
+  }
+
+  function loadSampleFile() {
+    fetch(resolveAssetUrl(SAMPLE_PDF_PATH))
+      .then(function (res) {
+        if (!res.ok) throw new Error("sample fetch failed");
+        return res.blob();
+      })
+      .then(function (blob) {
+        var file = new File([blob], SAMPLE_PDF_NAME, { type: "application/pdf" });
+        state.localFiles = [file];
+        state.form.uploadedFiles = [
+          {
+            displayName: SAMPLE_PDF_NAME,
+            sizeBytes: file.size,
+            fileId: "",
+          },
+        ];
+        showToast("示例文件已加载");
+        render();
+      })
+      .catch(function () {
+        showToast("示例文件加载失败");
+      });
+  }
+
   function onHeaderMenuClick() {
     if (state.stage === STAGE.UPLOAD) {
-      showToast("示例文件功能需在 Native 端下载，请上传您的体检报告");
+      loadSampleFile();
     }
   }
 
