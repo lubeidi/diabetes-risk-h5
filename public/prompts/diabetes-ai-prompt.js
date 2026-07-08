@@ -16,6 +16,8 @@
     "你是AI健康顾问，基于用户提供的健康数据智能解答糖尿病及代谢相关问题。\n" +
     "回答简洁专业，使用中文，给出可执行建议。不要编造用户未提供的检验数值。";
 
+  var PDF_EVALUATION_HINT = "请用我上传的pdf评估，里面有所有需要的参数";
+
   function yesNo(value) {
     return value ? "是" : "否";
   }
@@ -70,7 +72,7 @@
       userContent = buildUserText(form);
     } else {
       userContent = [
-        { type: "text", text: buildUserText(form) },
+        { type: "text", text: buildUserText(form) + PDF_EVALUATION_HINT },
         { type: "file", file: { file_id: fileId } },
       ];
     }
@@ -96,6 +98,7 @@
 
   global.DiabetesAiPrompt = {
     SYSTEM_PROMPT: SYSTEM_PROMPT,
+    PDF_EVALUATION_HINT: PDF_EVALUATION_HINT,
     buildUserText: buildUserText,
     buildMessages: buildMessages,
     buildAdvisorMessages: buildAdvisorMessages,
