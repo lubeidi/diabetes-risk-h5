@@ -284,12 +284,54 @@
     return false;
   }
 
+  function hasMethodOnBridge(bridge, method) {
+    return !!(bridge && typeof bridge[method] === "function");
+  }
+
+  function hasWebkitHandler(name) {
+    return !!(global.webkit && global.webkit.messageHandlers && global.webkit.messageHandlers[name]);
+  }
+
+  /** 按优先级探测 bridge 对象，只调用第一个命中的方法（避免 finish+goBack 双触发）。 */
+  function invokeBridgeMethod(method, args) {
+    args = args || [];
+    var bridges = [
+      global.WearfitBridge,
+      global.android_common,
+      global.ios_common,
+      global.NativeBridge,
+    ];
+    var i;
+    for (i = 0; i < bridges.length; i++) {
+      if (hasMethodOnBridge(bridges[i], method)) {
+        bridges[i][method].apply(bridges[i], args);
+        return true;
+      }
+    }
+    if (hasWebkitHandler(method)) {
+      global.webkit.messageHandlers[method].postMessage(args.length === 1 ? args[0] : args);
+      return true;
+    }
+    return false;
+  }
+
+  /**
+   * 关闭 Native 容器页。preferGoBack=true 时优先 goBack（H5 内路由），否则优先 finish。
+   * 仅调用一种 bridge 方法，不做返回值链式 fallback。
+   */
+  function closeNativePage(preferGoBack) {
+    var primary = preferGoBack ? "goBack" : "finish";
+    var secondary = preferGoBack ? "finish" : "goBack";
+    if (invokeBridgeMethod(primary)) return true;
+    return invokeBridgeMethod(secondary);
+  }
+
   function finish() {
-    return callBridge("finish") || callBridge("goBack");
+    return closeNativePage(false);
   }
 
   function goBack() {
-    return callBridge("goBack") || callBridge("finish");
+    return closeNativePage(true);
   }
 
   function jumpNative(type, params) {
