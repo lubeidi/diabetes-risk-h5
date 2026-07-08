@@ -82,15 +82,16 @@
     ];
   }
 
-  function buildAdvisorMessages(form, history, userMessage) {
+  function buildAdvisorMessages(form, historyMessages, userMessage) {
     var messages = [
       {
         role: "system",
         content: ADVISOR_SYSTEM + "\n\n用户健康数据摘要：\n" + buildUserText(form),
       },
     ];
-    (history || []).forEach(function (pair) {
-      messages.push({ role: pair[0], content: pair[1] });
+    (historyMessages || []).forEach(function (m) {
+      if (!m || !m.role) return;
+      messages.push({ role: m.role, content: m.content });
     });
     messages.push({ role: "user", content: userMessage });
     return messages;

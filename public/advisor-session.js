@@ -6,14 +6,39 @@
 
   var reportUserMessage = "";
   var reportAssistantMessage = "";
+  var reportPrimaryFileId = "";
   var visibleChatHistory = [];
   var active = false;
 
-  function beginResultSession(reportAnswer, userPrompt) {
+  function setReportContext(reportAnswer, userPrompt, primaryFileId, resetFileId) {
     reportUserMessage = userPrompt || "";
     reportAssistantMessage = global.DiabetesThinkingFilter.strip(reportAnswer || "");
-    visibleChatHistory = [];
+    if (resetFileId) {
+      reportPrimaryFileId = primaryFileId || "";
+    } else if (primaryFileId && !reportPrimaryFileId) {
+      reportPrimaryFileId = primaryFileId;
+    }
     active = true;
+  }
+
+  function beginResultSession(reportAnswer, userPrompt, primaryFileId) {
+    setReportContext(reportAnswer, userPrompt, primaryFileId, true);
+    visibleChatHistory = [];
+  }
+
+  function hasReportContext() {
+    return !!(reportAssistantMessage && reportUserMessage);
+  }
+
+  function ensureReportContext(reportAnswer, userPrompt, primaryFileId) {
+    if (!reportAnswer) return;
+    if (!hasReportContext()) {
+      setReportContext(reportAnswer, userPrompt, primaryFileId, true);
+      return;
+    }
+    if (primaryFileId && !reportPrimaryFileId) {
+      reportPrimaryFileId = primaryFileId;
+    }
   }
 
   function isActive() {
@@ -23,11 +48,25 @@
   function contextForApi() {
     var list = [];
     if (reportAssistantMessage) {
-      list.push(["user", reportUserMessage]);
-      list.push(["assistant", reportAssistantMessage]);
+      var userContent = reportUserMessage;
+      if (reportPrimaryFileId) {
+        userContent = [
+          {
+            type: "text",
+            text:
+              reportUserMessage +
+              (global.DiabetesAiPrompt && global.DiabetesAiPrompt.PDF_EVALUATION_HINT
+                ? global.DiabetesAiPrompt.PDF_EVALUATION_HINT
+                : ""),
+          },
+          { type: "file", file: { file_id: reportPrimaryFileId } },
+        ];
+      }
+      list.push({ role: "user", content: userContent });
+      list.push({ role: "assistant", content: reportAssistantMessage });
     }
     visibleChatHistory.forEach(function (pair) {
-      list.push(pair);
+      list.push({ role: pair[0], content: pair[1] });
     });
     return list;
   }
@@ -45,11 +84,14 @@
     active = false;
     reportUserMessage = "";
     reportAssistantMessage = "";
+    reportPrimaryFileId = "";
     visibleChatHistory = [];
   }
 
   global.DiabetesAdvisorSession = {
     beginResultSession: beginResultSession,
+    ensureReportContext: ensureReportContext,
+    hasReportContext: hasReportContext,
     isActive: isActive,
     contextForApi: contextForApi,
     visibleMessages: visibleMessages,

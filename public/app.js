@@ -862,15 +862,34 @@
     runTask();
   }
 
+  function resolvePrimaryFileId() {
+    if (state.fileIds && state.fileIds.length) return state.fileIds[0];
+    var uploaded = state.form && state.form.uploadedFiles;
+    if (uploaded && uploaded.length) {
+      for (var i = 0; i < uploaded.length; i++) {
+        if (uploaded[i].fileId) return uploaded[i].fileId;
+      }
+    }
+    return "";
+  }
+
+  function ensureAdvisorSession() {
+    if (!state.resultAnswer) return;
+    DiabetesAdvisorSession.ensureReportContext(
+      state.resultAnswer,
+      DiabetesAiPrompt.buildUserText(state.form),
+      resolvePrimaryFileId()
+    );
+  }
+
   function navigateToResult(answer, fileIds) {
     state.resultAnswer = DiabetesThinkingFilter.strip(answer);
     state.fileIds = fileIds || [];
-    if (!DiabetesAdvisorSession.isActive()) {
-      DiabetesAdvisorSession.beginResultSession(
-        state.resultAnswer,
-        DiabetesAiPrompt.buildUserText(state.form)
-      );
-    }
+    DiabetesAdvisorSession.beginResultSession(
+      state.resultAnswer,
+      DiabetesAiPrompt.buildUserText(state.form),
+      resolvePrimaryFileId()
+    );
     state.stage = STAGE.RESULT;
     render();
   }
@@ -947,6 +966,7 @@
   }
 
   function openAdvisor(prefill) {
+    ensureAdvisorSession();
     DiabetesRiskTracker.resultAskAiClick(state.resultSource);
     state.stage = STAGE.ADVISOR;
     render();
@@ -1018,6 +1038,7 @@
     if (!input || state.advisorSending) return;
     var text = input.value.trim();
     if (!text) return;
+    ensureAdvisorSession();
     if (
       state.enableAdvisorLimit &&
       !state.isVip &&

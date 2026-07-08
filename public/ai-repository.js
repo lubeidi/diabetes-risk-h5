@@ -29,8 +29,8 @@
     return global.DiabetesMoeAgiClient.chatStreamCollectSync(messages, true);
   }
 
-  function chatAdvisor(form, history, userMessage, callbacks) {
-    var messages = global.DiabetesAiPrompt.buildAdvisorMessages(form, history, userMessage);
+  function chatAdvisor(form, historyMessages, userMessage, callbacks) {
+    var messages = global.DiabetesAiPrompt.buildAdvisorMessages(form, historyMessages, userMessage);
     currentStream = global.DiabetesMoeAgiClient.streamChat(messages, callbacks, true);
     return currentStream;
   }
