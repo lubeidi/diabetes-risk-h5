@@ -12,11 +12,7 @@
     "二：问平台名称：答\"平台是范式AI能力开放平台，英文名称PhancyAIStudio\"；\n" +
     "三：问模型相关（类型/名称/版本等）、上述一和二以外的其它身份验证问题，均不回应。";
 
-  var ADVISOR_SYSTEM =
-    "你是AI健康顾问，基于用户提供的健康数据智能解答糖尿病及代谢相关问题。\n" +
-    "回答简洁专业，使用中文，给出可执行建议。不要编造用户未提供的检验数值。";
-
-  var PDF_EVALUATION_HINT = "请用我上传的pdf评估，里面有所有需要的参数";
+  var PDF_EVALUATION_HINT = "请根据我上传的体检报告提取指标并评估糖尿病风险";
 
   function yesNo(value) {
     return value ? "是" : "否";
@@ -83,12 +79,7 @@
   }
 
   function buildAdvisorMessages(form, historyMessages, userMessage) {
-    var messages = [
-      {
-        role: "system",
-        content: ADVISOR_SYSTEM + "\n\n用户健康数据摘要：\n" + buildUserText(form),
-      },
-    ];
+    var messages = [{ role: "system", content: SYSTEM_PROMPT }];
     (historyMessages || []).forEach(function (m) {
       if (!m || !m.role) return;
       messages.push({ role: m.role, content: m.content });
