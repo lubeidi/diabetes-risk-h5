@@ -1021,6 +1021,30 @@
     mainEl.scrollTop = mainEl.scrollHeight;
   }
 
+  var advisorStreamRenderRaf = 0;
+
+  function cancelAdvisorStreamRender() {
+    if (advisorStreamRenderRaf) {
+      cancelAnimationFrame(advisorStreamRenderRaf);
+      advisorStreamRenderRaf = 0;
+    }
+  }
+
+  function renderAdvisorStreamBubble(bubble, markdown, hydrateImages) {
+    if (!bubble) return;
+    bubble.innerHTML = DiabetesMarkdown.render(markdown);
+    if (hydrateImages) DiabetesMarkdown.hydrateImages(bubble);
+    scrollAdvisorToBottom();
+  }
+
+  function scheduleAdvisorStreamRender(bubble) {
+    if (!bubble || advisorStreamRenderRaf) return;
+    advisorStreamRenderRaf = requestAnimationFrame(function () {
+      advisorStreamRenderRaf = 0;
+      renderAdvisorStreamBubble(bubble, state.advisorStreamText, false);
+    });
+  }
+
   function appendAdvisorBubble(role, text, isMarkdown) {
     var container = document.getElementById("advisor-messages");
     if (!container) return null;
@@ -1054,7 +1078,7 @@
     state.advisorStreamText = "";
     updateAdvisorSendButton();
 
-    var streamBubble = appendAdvisorBubble("ai", "", false);
+    var streamBubble = appendAdvisorBubble("ai", "", true);
 
     DiabetesAiRepository.chatAdvisor(
       state.form,
@@ -1063,15 +1087,12 @@
       {
         onAnswerChunk: function (chunk) {
           state.advisorStreamText += chunk;
-          if (streamBubble) streamBubble.textContent = state.advisorStreamText;
-          scrollAdvisorToBottom();
+          scheduleAdvisorStreamRender(streamBubble);
         },
         onComplete: function (full) {
+          cancelAdvisorStreamRender();
           var reply = DiabetesThinkingFilter.strip(full || state.advisorStreamText);
-          if (streamBubble) {
-            streamBubble.innerHTML = DiabetesMarkdown.render(reply);
-            DiabetesMarkdown.hydrateImages(streamBubble);
-          }
+          renderAdvisorStreamBubble(streamBubble, reply, true);
           DiabetesAdvisorSession.appendExchange(text, reply);
           state.advisorSending = false;
           state.advisorStreamText = "";
@@ -1079,13 +1100,14 @@
             DiabetesFreeChatCounter.recordFreeUse(window.DIABETES_USER_ID);
           }
           updateAdvisorSendButton();
-          scrollAdvisorToBottom();
         },
         onError: function (msg) {
+          cancelAdvisorStreamRender();
           if (streamBubble && streamBubble.parentNode) {
             streamBubble.parentNode.removeChild(streamBubble);
           }
           state.advisorSending = false;
+          state.advisorStreamText = "";
           showToast(msg || "发送失败，请稍后重试");
           updateAdvisorSendButton();
         },
