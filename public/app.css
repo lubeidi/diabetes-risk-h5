@@ -20,9 +20,10 @@ body {
 }
 
 :root {
-  --purple: #7c3aed;
-  --purple-light: #ede9fe;
-  --purple-dark: #6d28d9;
+  /* Align with Native colors_diabetes.xml (diabetes_purple_* = app orange) */
+  --purple: #f96623;
+  --purple-light: #fff0e8;
+  --purple-dark: #e85a15;
   --text-hint: #999;
   --text-body: #333;
   --border: #e8e8e8;
@@ -399,7 +400,7 @@ body {
 
 .processing__status {
   font-size: 13px;
-  color: var(--text-hint);
+  color: var(--purple);
   margin-bottom: 24px;
   min-height: 20px;
 }
