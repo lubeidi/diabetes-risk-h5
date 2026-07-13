@@ -1,4 +1,4 @@
-replicaCount: 2
+replicaCount: 1
 
 image:
   repository: bj-warehouse.tencentcloudcr.com/weike/diabetes-risk

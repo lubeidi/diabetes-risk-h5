@@ -117,11 +117,12 @@
   }
 
   function validateNumericField(key, value, required, emptyMessage) {
-    if (!value && required) {
+    var text = String(value == null ? "" : value).trim();
+    if (!text && required) {
       state.fieldErrors[key] = emptyMessage;
       return false;
     }
-    if (value && !isValidNumber(value)) {
+    if (text && !isValidNumber(text)) {
       state.fieldErrors[key] = "请输入有效数字";
       return false;
     }
@@ -191,7 +192,9 @@
   function renderField(key, label, unit, required, allowDecimal) {
     var err = state.fieldErrors[key];
     return (
-      '<div class="field" data-field-key="' +
+      '<div class="field' +
+      (err ? " has-error" : "") +
+      '" data-field-key="' +
       key +
       '">' +
       '<div class="field__label' +
@@ -349,32 +352,35 @@
         "</div></div>";
     });
 
+    var body = "";
     if (!state.localFiles.length) {
-      return (
+      body =
         '<p class="subtitle">上传PDF体检报告</p>' +
         '<div class="upload-zone" id="upload-zone">' +
-        '<div>点击上传体检报告</div>' +
+        "<div>点击上传体检报告</div>" +
         '<div style="font-size:12px;margin-top:8px">仅支持 PDF，最多 ' +
         MAX_FILES +
         " 个，单文件 ≤ 100MB</div>" +
         "</div>" +
         '<input type="file" id="file-input" accept="application/pdf,.pdf" class="hidden" />' +
-        '<p class="subtitle" style="margin-top:16px">AI将自动识别报告中的血糖、血脂、肝肾功能等指标，无需手动填写</p>'
-      );
+        '<p class="subtitle" style="margin-top:16px">AI将自动识别报告中的血糖、血脂、肝肾功能等指标，无需手动填写</p>';
+    } else {
+      body =
+        '<p class="subtitle">文件已就绪</p>' +
+        filesHtml +
+        '<input type="file" id="file-input" accept="application/pdf,.pdf" class="hidden" />' +
+        '<div class="btn-row">' +
+        '<button type="button" class="btn btn--ghost" id="btn-reselect">重新选择文件</button>' +
+        '<button type="button" class="btn btn--primary" id="btn-start-parse">开始 AI 解读</button>' +
+        "</div>";
     }
 
-    return (
-      '<p class="subtitle">文件已就绪</p>' +
-      filesHtml +
-      '<input type="file" id="file-input" accept="application/pdf,.pdf" class="hidden" />' +
+    // Align with native: manual entry is always available on upload page.
+    body +=
       '<div class="btn-row">' +
-      '<button type="button" class="btn btn--ghost" id="btn-reselect">重新选择文件</button>' +
-      '<button type="button" class="btn btn--primary" id="btn-start-parse">开始 AI 解读</button>' +
-      "</div>" +
-      '<div class="btn-row">' +
-      '<button type="button" class="btn btn--secondary" id="btn-upload-manual">手动填写数据</button>' +
-      "</div>"
-    );
+      '<button type="button" class="btn btn--secondary btn--block" id="btn-upload-manual">手动填写数据</button>' +
+      "</div>";
+    return body;
   }
 
   function renderManual() {
@@ -447,15 +453,7 @@
       "</div>" +
       overlay +
       "</div>" +
-      '<div class="disclaimer">本结果基于您提供的数据由 AI 模型生成，仅供健康参考，不能替代专业医疗诊断。</div>' +
-      '<div class="result-bottom">' +
-      '<div class="chips">' +
-      '<button type="button" class="chip" data-chip="如何改善血糖？">如何改善血糖？</button>' +
-      '<button type="button" class="chip" data-chip="推荐运动计划">推荐运动计划</button>' +
-      '<button type="button" class="chip" data-chip="饮食调控方案">饮食调控方案</button>' +
-      "</div>" +
-      '<button type="button" class="btn btn--primary" id="btn-ask-ai">问AI · 获取个性化健康建议</button>' +
-      "</div>"
+      '<div class="disclaimer">本结果基于您提供的数据由 AI 模型生成，仅供健康参考，不能替代专业医疗诊断。</div>'
     );
   }
 
@@ -512,7 +510,7 @@
   function renderBottomBar() {
     if (state.stage === STAGE.LIFESTYLE) {
       bottomBarEl.innerHTML =
-        '<button type="button" class="btn btn--primary" id="btn-next">下一步</button>';
+        '<button type="button" class="btn btn--primary btn--block" id="btn-next">下一步</button>';
       bottomBarEl.classList.remove("hidden");
       return;
     }
@@ -520,9 +518,23 @@
       var label =
         state.manualStep < maxManualStep() ? "下一步" : "开始 AI 分析";
       bottomBarEl.innerHTML =
-        '<button type="button" class="btn btn--primary" id="btn-next">' +
+        '<button type="button" class="btn btn--primary btn--block" id="btn-next">' +
         label +
         "</button>";
+      bottomBarEl.classList.remove("hidden");
+      return;
+    }
+    if (state.stage === STAGE.RESULT) {
+      // Align with native fixed bottom bar: chips + full-width Ask AI.
+      bottomBarEl.innerHTML =
+        '<div class="result-bottom result-bottom--fixed">' +
+        '<div class="chips">' +
+        '<button type="button" class="chip" data-chip="如何改善血糖？">如何改善血糖？</button>' +
+        '<button type="button" class="chip" data-chip="推荐运动计划">推荐运动计划</button>' +
+        '<button type="button" class="chip" data-chip="饮食调控方案">饮食调控方案</button>' +
+        "</div>" +
+        '<button type="button" class="btn btn--primary btn--block" id="btn-ask-ai">问AI · 获取个性化健康建议</button>' +
+        "</div>";
       bottomBarEl.classList.remove("hidden");
       return;
     }
@@ -531,7 +543,6 @@
   }
 
   function render() {
-    state.fieldErrors = {};
     var html = "";
     switch (state.stage) {
       case STAGE.LIFESTYLE:
@@ -565,6 +576,7 @@
         html = renderLifestyle();
     }
     mainEl.innerHTML = html;
+    mainEl.classList.toggle("main--with-result-bar", state.stage === STAGE.RESULT);
     renderBottomBar();
     bindStageEvents();
     trackStagePageClicks();
@@ -630,6 +642,16 @@
       input.addEventListener("input", function () {
         var key = input.getAttribute("data-input-key");
         state.form[key] = input.value.trim();
+        if (state.fieldErrors[key]) {
+          delete state.fieldErrors[key];
+          var field = input.closest(".field");
+          var errEl = field && field.querySelector(".field__error");
+          if (errEl) {
+            errEl.classList.remove("is-visible");
+            errEl.textContent = "";
+          }
+          field && field.classList.remove("has-error");
+        }
       });
     });
 
@@ -741,7 +763,8 @@
       });
     }
 
-    mainEl.querySelectorAll(".chip[data-chip]").forEach(function (chip) {
+    var chipRoot = bottomBarEl.classList.contains("hidden") ? mainEl : bottomBarEl;
+    chipRoot.querySelectorAll(".chip[data-chip]").forEach(function (chip) {
       chip.addEventListener("click", function () {
         openAdvisor(chip.getAttribute("data-chip"));
       });
@@ -780,10 +803,12 @@
   function onNextClick() {
     collectFieldsFromDom();
     if (state.stage === STAGE.LIFESTYLE) {
+      state.fieldErrors = {};
       if (!validateLifestyleFields()) {
         render();
         return;
       }
+      state.fieldErrors = {};
       DiabetesRiskTracker.lifeNextClick();
       state.skipLifestyle = true;
       // Align with native flow: default to upload page, manual entry can be chosen within upload page.
@@ -799,6 +824,7 @@
         render();
         return;
       }
+      state.fieldErrors = {};
       if (state.manualStep < maxManualStep()) {
         if (state.manualStep === 0) DiabetesRiskTracker.gluNextClick();
         state.manualStep++;

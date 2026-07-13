@@ -8,7 +8,18 @@
     />
     <meta name="theme-color" content="#f96623" />
     <title>糖尿病风险AI预测</title>
-    <link rel="stylesheet" href="app.css" />
+    <link rel="stylesheet" href="app.css?v=form-ui-20260713" />
+    <style>
+      :root {
+        --accent: #f96623;
+        --accent-light: #fff0e8;
+        --accent-dark: #e85a15;
+        /* Backward compat if an old cached app.css still references --purple */
+        --purple: #f96623;
+        --purple-light: #fff0e8;
+        --purple-dark: #e85a15;
+      }
+    </style>
     <script>
       (function () {
         var q = new URLSearchParams(location.search);
@@ -67,6 +78,6 @@
     <script src="free-chat-counter.js" defer></script>
     <script src="report-access.js" defer></script>
     <script src="markdown.js" defer></script>
-    <script src="app.js" defer></script>
+    <script src="app.js?v=form-ui-20260713" defer></script>
   </body>
 </html>
